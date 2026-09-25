@@ -1,8 +1,8 @@
-// Service worker minimo: cachea index.html (y esta misma pagina) para que funcione sin conexion
+// Service worker minimo: cachea el_obrador.html (y esta misma pagina) para que funcione sin conexion
 // una vez se ha abierto al menos una vez. Se actualiza solo cuando cambia CACHE_NAME.
 const CACHE_NAME = "el-obrador-v1";
 const URLS_TO_CACHE = [
-  "./index.html",
+  "./el_obrador.html",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
