@@ -1,8 +1,9 @@
-// Service worker minimo: cachea el_obrador.html (y esta misma pagina) para que funcione sin conexion
-// una vez se ha abierto al menos una vez. Se actualiza solo cuando cambia CACHE_NAME.
-const CACHE_NAME = "el-obrador-v1";
+// v2: cambia a estrategia "red primero, cache como respaldo" -- así, cada vez que
+// se sube una actualización a GitHub, el usuario la ve en la siguiente carga sin
+// tener que desinstalar nada. El cache solo se usa si no hay conexión.
+const CACHE_NAME = "el-obrador-v2";
 const URLS_TO_CACHE = [
-  "./el_obrador.html",
+  "./index.html",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
@@ -26,9 +27,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).catch(() => cached);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // guardamos siempre la última versión buena en cache, por si se pierde la conexión
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
