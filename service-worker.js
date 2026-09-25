@@ -1,7 +1,8 @@
-// v2: cambia a estrategia "red primero, cache como respaldo" -- así, cada vez que
-// se sube una actualización a GitHub, el usuario la ve en la siguiente carga sin
-// tener que desinstalar nada. El cache solo se usa si no hay conexión.
-const CACHE_NAME = "el-obrador-v2";
+// v3: igual que v2 (red primero, cache como respaldo offline), pero ahora la petición
+// de red se hace con {cache: "no-store"} -- así ignoramos también la caché HTTP normal
+// del propio navegador (la que pone GitHub Pages por defecto durante unos minutos),
+// no solo la caché del service worker. Cada carga pide de verdad la última versión.
+const CACHE_NAME = "el-obrador-v3";
 const URLS_TO_CACHE = [
   "./index.html",
   "./manifest.json",
@@ -27,9 +28,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-store" })
       .then((response) => {
-        // guardamos siempre la última versión buena en cache, por si se pierde la conexión
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return response;
